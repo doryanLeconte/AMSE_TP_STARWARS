@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">AMSE_TP_STARWARS</string>
+    <string name="app_name">StarWars</string>
+    <string name="vaisseau">vaisseau</string>
+    <string name="joystickframe">JoystickFrame</string>
+    <string name="joystickcenter">JoystickCenter</string>
+    <string name="asteroid2">asteroid2</string>
+    <string name="asteroid4">asteroid4</string>
 </resources>

@@ -4,15 +4,66 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/etoilefond"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <FrameLayout
+        android:id="@+id/game_zone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/vaisseau"
+            android:layout_width="100dp"
+            android:layout_height="102dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/vaisseau"
+            app:srcCompat="@drawable/tie" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/joystick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center">
+
+            <ImageView
+                android:id="@+id/joystick_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/joystickframe"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/pad_exterior" />
+
+            <ImageView
+                android:id="@+id/joystick_center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/joystickcenter"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/pad_center" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/asteroid2"
+            android:layout_width="103dp"
+            android:layout_height="103dp"
+            android:contentDescription="@string/asteroid2"
+            app:srcCompat="@drawable/asteroid2" />
+
+        <ImageView
+            android:id="@+id/asteroid4"
+            android:layout_width="102dp"
+            android:layout_height="108dp"
+            android:contentDescription="@string/asteroid4"
+            app:srcCompat="@drawable/asteroid4" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
