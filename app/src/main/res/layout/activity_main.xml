@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/etoilefond"
@@ -16,7 +17,7 @@
         <ImageView
             android:id="@+id/vaisseau"
             android:layout_width="100dp"
-            android:layout_height="102dp"
+            android:layout_height="100dp"
             android:layout_gravity="center"
             android:contentDescription="@string/vaisseau"
             app:srcCompat="@drawable/tie" />
@@ -52,15 +53,15 @@
 
         <ImageView
             android:id="@+id/asteroid2"
-            android:layout_width="103dp"
-            android:layout_height="103dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:contentDescription="@string/asteroid2"
             app:srcCompat="@drawable/asteroid2" />
 
         <ImageView
             android:id="@+id/asteroid4"
-            android:layout_width="102dp"
-            android:layout_height="108dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:contentDescription="@string/asteroid4"
             app:srcCompat="@drawable/asteroid4" />
 
