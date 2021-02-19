@@ -1,8 +1,14 @@
 package com.imt.amse_tp_starwars;
 
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -11,59 +17,88 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
+
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final float SPEED = 0.01f;
     boolean joystickIsPressed;
     float joystickCenterX;
     float joystickCenterY;
-    private boolean running;
+    private View game_zone;
+    private ConstraintLayout constraintLayout;
+    private ConstraintLayout joystickConstrainLayout;
+    private Boolean calibrateSensor;
+    private ImageView joystick;
+    private SensorManager mSensorManager;
+    private Sensor accelerometer;
+    private SwitchMaterial accelerometre_switch;
+    private ImageView joystick1;
+    private ImageView vaisseau;
+    private ImageView asteroid2;
+    private ImageView asteroid4;
+    private float initialAccelerometreValueX;
+    private float initialAccelerometreValueY;
+    private float initialAccelerometreValueZ;
+    private FloatingActionButton calibrateAccelerometre;
+    private float dx;
+    private float dy;
+    private boolean isAccelerometreChecked;
+    private boolean started;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ImageView joystick = findViewById(R.id.joystick_center);
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        calibrateAccelerometre = findViewById(R.id.floatingActionButton);
+        calibrateAccelerometre.setVisibility(View.GONE);
+
+        isAccelerometreChecked = false;
+
+        joystick = findViewById(R.id.joystick_center);
+        joystickConstrainLayout = findViewById(R.id.joystick);
+
+        accelerometre_switch = findViewById(R.id.switch_accelerometre);
+        accelerometre_switch.setOnCheckedChangeListener(this::onSwitchChange);
+
+        calibrateSensor = true;
 
         joystickCenterX = joystick.getTranslationX();
         joystickCenterY = joystick.getTranslationY();
-        running = false;
+
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        running = true;
+        started = false;
         moveAsteroid(findViewById(R.id.asteroid2));
         moveAsteroid(findViewById(R.id.asteroid4));
 
-        ImageView joystick = findViewById(R.id.joystick_center);
-        ImageView vaisseau = findViewById(R.id.vaisseau);
-        ImageView asteroid2 = findViewById(R.id.asteroid2);
-        ImageView asteroid4 = findViewById(R.id.asteroid4);
-        View game_zone = findViewById(R.id.game_zone);
-        ConstraintLayout cl = findViewById(R.id.constraintLayout);
+        joystick1 = findViewById(R.id.joystick_center);
+        vaisseau = findViewById(R.id.vaisseau);
+        asteroid2 = findViewById(R.id.asteroid2);
+        asteroid4 = findViewById(R.id.asteroid4);
+        game_zone = findViewById(R.id.game_zone);
+        constraintLayout = findViewById(R.id.constraintLayout);
 
-
-        game_zone.setOnTouchListener((v, event) -> {
-            v.performClick();
-            running = !running;
-
-            vaisseau.setTranslationY(0.2f);
-            vaisseau.setTranslationX(0.2f);
-            return true;
-        });
 
         Handler handlerForMovingTie = new Handler();
         Runnable movingTie = new Runnable() {
@@ -74,14 +109,10 @@ public class MainActivity extends AppCompatActivity {
                 if (joystickIsPressed) {
                     handlerForMovingTie.postDelayed(this, 10);
 
-                    if (vaisseau.getX() + vaisseau.getWidth() < game_zone.getWidth() && joystick.getTranslationX() > 0)
-                        vaisseau.setTranslationX(vaisseau.getTranslationX() + joystick.getTranslationX() * SPEED);
-                    if (vaisseau.getX() > 0 && joystick.getTranslationX() < 0)
-                        vaisseau.setTranslationX(vaisseau.getTranslationX() + joystick.getTranslationX() * SPEED);
-                    if (vaisseau.getY() + vaisseau.getHeight() < game_zone.getHeight() && joystick.getTranslationY() > 0)
-                        vaisseau.setTranslationY(vaisseau.getTranslationY() + joystick.getTranslationY() * SPEED);
-                    if (vaisseau.getY() > 0 && joystick.getTranslationY() < 0)
-                        vaisseau.setTranslationY(vaisseau.getTranslationY() + joystick.getTranslationY() * SPEED);
+                    float translationX = joystick1.getTranslationX();
+                    float translationY = joystick1.getTranslationY();
+
+                    moveVaisseau(translationX, translationY, vaisseau);
                 }
             }
         };
@@ -91,50 +122,62 @@ public class MainActivity extends AppCompatActivity {
         Runnable detectCollision = new Runnable() {
             @Override
             public void run() {
-
                 handlerForDetection.postDelayed(this, 10);
-                if (isCollision(vaisseau, asteroid2) || isCollision(vaisseau, asteroid4)) {
-                    ImageView explosion = new ImageView(getApplicationContext());
-                    explosion.setImageDrawable(getDrawable(R.drawable.explosion));
-                    LayoutParams explosionParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
-                    explosionParams.addRule(RelativeLayout.ABOVE, vaisseau.getId());
-                    explosion.setLayoutParams(explosionParams);
-                    explosion.setTranslationX(vaisseau.getTranslationX());
-                    explosion.setTranslationY(vaisseau.getTranslationY());
+                if (started) {
 
-                    cl.addView(explosion);
+                    if (isCollision(vaisseau, asteroid2) || isCollision(vaisseau, asteroid4)) {
+                        ImageView explosion = new ImageView(getApplicationContext());
+                        explosion.setImageDrawable(getDrawable(R.drawable.explosion));
+                        LayoutParams explosionParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+                        explosionParams.addRule(RelativeLayout.ABOVE, vaisseau.getId());
+                        explosion.setLayoutParams(explosionParams);
+                        explosion.setTranslationX(vaisseau.getTranslationX());
+                        explosion.setTranslationY(vaisseau.getTranslationY());
+
+                        constraintLayout.addView(explosion);
 
 
-                    Log.d("COLLISION", "COLLIDED");
+                        getApplicationContext().startActivity(new Intent(MainActivity.this, GameOver.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                        started = false;
+                        finish();
+                        Log.d("COLLISION", "COLLIDED");
+                    }
+
                 }
-
             }
 
         };
 
         detectCollision.run();
 
-        /*
-         * Problème joystock clignote
-         * ça affecte aussi le vaisseau quand on reste appuyé
-         * */
-        joystick.setOnTouchListener((v, event) -> {
+        calibrateAccelerometre.setOnClickListener((view) -> {
+            calibrateSensor = true;
+        });
+
+        joystick1.setOnTouchListener((v, event) -> {
+            float x;
+            float y;
+
+            x = event.getRawX() + dx;
+            y = event.getRawY() + dy;
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    Log.d("MOTION_EVENT", "DOWN");
+
+                    started = true;
+                    dx = joystick1.getX() - event.getRawX();
+                    dy = joystick1.getY() - event.getRawY();
                     joystickIsPressed = true;
                     break;
                 case MotionEvent.ACTION_UP:
-                    Log.d("MOTION_EVENT", "UP");
-                    joystick.setTranslationX(joystickCenterX);
-                    joystick.setTranslationY(joystickCenterY);
+                    joystick1.setTranslationX(joystickCenterX);
+                    joystick1.setTranslationY(joystickCenterY);
                     joystickIsPressed = false;
                     break;
                 case MotionEvent.ACTION_MOVE:
-
-                    joystick.setX(event.getX());
-                    joystick.setY(event.getY());
+                    joystick1.setX(x);
+                    joystick1.setY(y);
                     movingTie.run();
                     break;
                 default:
@@ -144,6 +187,17 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+    }
+
+    private void moveVaisseau(float translationX, float translationY, ImageView vaisseau) {
+        if (vaisseau.getX() + vaisseau.getWidth() < game_zone.getWidth() && translationX > 0)
+            vaisseau.setTranslationX(vaisseau.getTranslationX() + translationX * SPEED);
+        if (vaisseau.getX() > 0 && translationX < 0)
+            vaisseau.setTranslationX(vaisseau.getTranslationX() + translationX * SPEED);
+        if (vaisseau.getY() + vaisseau.getHeight() < game_zone.getHeight() && translationY > 0)
+            vaisseau.setTranslationY(vaisseau.getTranslationY() + translationY * SPEED);
+        if (vaisseau.getY() > 0 && translationY < 0)
+            vaisseau.setTranslationY(vaisseau.getTranslationY() + translationY * SPEED);
     }
 
     protected void moveAsteroid(View asteroid) {
@@ -177,5 +231,40 @@ public class MainActivity extends AppCompatActivity {
         return rectView1.intersect(rectView2);
     }
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (calibrateSensor) {
+            initialAccelerometreValueX = event.values[0];
+            initialAccelerometreValueY = event.values[1];
+            initialAccelerometreValueZ = event.values[2];
+            calibrateSensor ^= calibrateSensor;
+        }
+        float gammaX = event.values[0];
+        float gammaY = event.values[1];
+        float gammaZ = event.values[2];
+        Log.d("Valeurs accelerometre", gammaX + ", " + gammaY + ", " + gammaZ);
+        moveVaisseau(-(gammaX - initialAccelerometreValueX) * 5000, -(gammaZ - initialAccelerometreValueZ) * 5000, vaisseau);
+    }
+
+    public void onSwitchChange(CompoundButton buttonView, boolean isChecked) {
+        this.isAccelerometreChecked = isChecked;
+        Log.d("SWITCH", "onSwitchChange: " + this.isAccelerometreChecked);
+        if (isChecked) {
+            started = true;
+            joystickConstrainLayout.setVisibility(View.GONE);
+            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+            calibrateAccelerometre.setVisibility(View.VISIBLE);
+            Toast.makeText(this, "Appuyer sur le bouton pour calibrer l'accéléromètre", Toast.LENGTH_SHORT).show();
+
+        } else {
+            joystickConstrainLayout.setVisibility(View.VISIBLE);
+            calibrateAccelerometre.setVisibility(View.GONE);
+            mSensorManager.unregisterListener(this);
+        }
+    }
 
 }

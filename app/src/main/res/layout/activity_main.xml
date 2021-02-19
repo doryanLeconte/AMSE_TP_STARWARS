@@ -8,11 +8,34 @@
     android:background="@drawable/etoilefond"
     tools:context=".MainActivity">
 
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switch_accelerometre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/accelerometre"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="@+id/game_zone"
+        app:layout_constraintTop_toTopOf="@+id/game_zone" />
+
     <FrameLayout
         android:id="@+id/game_zone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:clickable="true"
+            android:contentDescription="TODO"
+            app:backgroundTint="@color/white"
+            app:srcCompat="@drawable/tie" />
 
         <ImageView
             android:id="@+id/vaisseau"

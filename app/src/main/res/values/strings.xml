@@ -5,4 +5,7 @@
     <string name="joystickcenter">JoystickCenter</string>
     <string name="asteroid2">asteroid2</string>
     <string name="asteroid4">asteroid4</string>
+    <string name="accelerometre">Accéléromètre</string>
+    <string name="restart">Restart</string>
+    <string name="gameover">Game Over !</string>
 </resources>
